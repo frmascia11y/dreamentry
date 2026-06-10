@@ -189,8 +189,10 @@ function form(){
       oninput="st.luogo=this.value">${st.luogo}</textarea>`;
 
   if(id==='trama') body=`
-    <textarea rows="5" placeholder="Cosa è successo…"
-      oninput="st.trama=this.value">${st.trama}</textarea>`;
+    <textarea rows="5" placeholder="Cosa è successo…" id="tramaInput"
+      oninput="st.trama=this.value;updateNext()"
+      onkeyup="st.trama=this.value;updateNext()"
+      onchange="st.trama=this.value;updateNext()">${st.trama}</textarea>`;
 
   if(id==='personaggi'){
     const ctx=st.luogo.trim().length>8?st.luogo.split('\n').filter(l=>l.trim().length>0)[0]:'';
@@ -332,6 +334,12 @@ function copyToClipboard(){
   }
 }
 
+function updateNext(){
+  const id=STEPS[st.step],m=META[id];
+  const ok=m.o||(id==='data'?!!st.data:id==='trama'?!!st.trama.trim():id==='titolo'?!!st.titolo.trim():true);
+  const btn=document.querySelector('.btn-p');
+  if(btn){btn.disabled=!ok&&!m.o;}
+}
 function prev(){if(st.step>0)patch({step:st.step-1});}
 function next(){
   const id=STEPS[st.step],m=META[id],last=st.step===STEPS.length-1;
