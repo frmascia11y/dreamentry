@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Sogni"/>
+<title>Diario dei Sogni</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7ff;min-height:100dvh;color:#1e293b}
+.app{max-width:480px;margin:0 auto;padding:24px 16px env(safe-area-inset-bottom,32px)}
+input,textarea,button{font-family:inherit}
+input[type=date],input[type=text],textarea{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px;font-size:16px;background:#fff;color:#1e293b;outline:none;line-height:1.6}
+input:focus,textarea:focus{border-color:#534AB7;box-shadow:0 0 0 3px rgba(83,74,183,.12)}
+textarea{resize:none}
+.btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#534AB7;color:#fff;border:none;border-radius:10px;padding:13px 24px;font-size:16px;font-weight:500;cursor:pointer;min-height:48px;white-space:nowrap;transition:background .15s}
+.btn-p:disabled{background:#e2e8f0;color:#94a3b8;cursor:default}
+.btn-p:active:not(:disabled){background:#3C3489}
+.btn-s{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#fff;color:#534AB7;border:1.5px solid #534AB7;border-radius:10px;padding:11px 24px;font-size:16px;font-weight:500;cursor:pointer;min-height:48px;white-space:nowrap}
+.btn-s:active{background:#EEEDFE}
+.btn-g{background:transparent;color:#94a3b8;border:none;padding:8px 0;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.hint{font-size:13px;color:#64748b;line-height:1.6;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:16px}
+.chip{padding:6px 14px;border-radius:999px;font-size:13px;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#64748b;transition:all .12s}
+.chip.on{border-width:1.5px;font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.acc{border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.acc-h{width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border:none;border-top:1px solid #e2e8f0;cursor:pointer;font-size:13px;font-weight:500;color:#475569}
+.acc-h:first-child{border-top:none}
+.acc-b{padding:10px 14px 14px;border-top:1px solid #e2e8f0;background:#fff}
+.badge{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;color:#fff}
+.dq{width:100%;text-align:left;padding:12px;border-radius:10px;font-size:14px;line-height:1.5;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#334155;margin-bottom:8px}
+.dq.on{border:1.5px solid #534AB7;background:#EEEDFE;color:#26215C;font-weight:500}
+.sep{height:1px;background:#e2e8f0;margin:20px 0}
+.cta{display:flex;align-items:center;gap:12px;margin-top:24px}
+.prog{display:flex;gap:3px;margin-bottom:16px}
+.ps{flex:1;height:3px;border-radius:99px;transition:background .2s}
+.sh{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.sc{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:2px}
+.sl{font-size:19px;font-weight:600;line-height:1.3;color:#1e293b}
+.ss{font-size:13px;color:#94a3b8;margin-top:2px}
+.ctx{padding:8px 12px;background:#f8fafc;border-radius:8px;border-left:2px solid #e2e8f0;font-size:13px;color:#94a3b8;font-style:italic;margin-bottom:12px;line-height:1.5}
+.dw{position:relative}
+.dw input{padding-right:40px}
+.di{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px;color:#94a3b8;pointer-events:none}
+.ar{display:flex;gap:8px;margin-top:12px}
+.ar input{flex:1}
+.ok-box{background:#E1F5EE;border:1px solid #0F6E56;border-radius:12px;padding:16px;text-align:center;margin-top:16px;color:#04342C;font-size:14px}
+.err-box{background:#FFF3CD;border:1px solid #FFCA2C;border-radius:12px;padding:16px;margin-top:16px;color:#664D03;font-size:13px;line-height:1.6}
+.pv-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px}
+.pv-sec{margin-bottom:16px}
+.tag{display:inline-flex;padding:3px 12px;border-radius:999px;font-size:12px;margin:2px}
+.card-h{background:#EEEDFE;border:1px solid #7F77DD;border-radius:16px;padding:16px;margin-bottom:20px}
+</style>
+</head>
+<body>
+<div class="app" id="root"></div>
+<script>
+const DB = "3244c0d68c1d495ca1846b9ff75d6ecb";
+const TOKEN = "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";
+
+const S = {
+  "Respirazione & torace":{c:"teal",  i:["Respiro corto","Fiato sospeso","Petto stretto","Groppo in gola","Respiro profondo"]},
+  "Cuore & circolazione": {c:"coral", i:["Cuore accelerato","Pulsazioni al collo","Calore improvviso","Brividi"]},
+  "Muscoli & movimento":  {c:"amber", i:["Tensione alle spalle","Mascella serrata","Gambe pesanti","Gambe molli","Tremore","Scatto al risveglio"]},
+  "Pelle & nervi":        {c:"acc",   i:["Pelle d'oca","Formicolio","Sudore","Sensazione di tocco"]},
+  "Pancia & visceri":     {c:"coral", i:["Stomaco chiuso","Nausea","Peso alla pancia","Vuoto allo stomaco"]},
+  "Testa & sensi":        {c:"teal",  i:["Testa piena","Confusione","Occhi pesanti","Leggerezza","Galleggiamento"]},
+};
+const E = {
+  "Attivazione": {c:"coral", i:["Ansia","Paura","Agitazione","Urgenza","Eccitazione"]},
+  "Inibizione":  {c:"amber", i:["Vergogna","Colpa","Imbarazzo","Disgusto","Ritiro"]},
+  "Distanza":    {c:"acc",   i:["Solitudine","Abbandono","Tristezza","Vuoto","Malinconia"]},
+  "Potere":      {c:"coral", i:["Rabbia","Frustrazione","Controllo","Orgoglio"]},
+  "Apertura":    {c:"teal",  i:["Curiosità","Stupore","Gioia","Leggerezza","Fiducia"]},
+  "Connessione": {c:"green", i:["Affetto","Sollievo","Gratitudine","Nostalgia","Tenerezza"]},
+  "Ambivalenza": {c:"amber", i:["Confusione","Resa","Disagio","Esplorazione","Disorientamento"]},
+};
+const SIMB = ["Sguardo","Verde","Sauna","Corpo maschile","Casa","Acqua","Identità","Ordine/disordine","Passaggio","Pulizia","Esposizione","Protezione"];
+const DQ = [
+  "Cosa mi ha lasciato questo sogno — un'emozione, un'immagine, una sensazione?",
+  "Questa figura o questo luogo mi ricorda qualcosa o qualcuno nella mia vita reale?",
+  "C'è una parte di me rappresentata da questo personaggio o simbolo?",
+  "Questo sogno sta compensando qualcosa che nella veglia sto evitando?",
+  "Cosa avrei voluto fare diversamente — e cosa me lo ha impedito?",
+];
+const STEPS = ["data","luogo","trama","personaggi","sensazioni","emozioni","simboli","associazioni","domande","titolo"];
+const META = {
+  data:        {l:"Quando?",                    s:"Data del sogno",                                        o:false},
+  luogo:       {l:"Dove eri?",                  s:"Il posto, l'atmosfera, la luce",                        o:true},
+  trama:       {l:"Cosa è successo?",            s:"Dal luogo, ricostruisci la scena",                      o:false},
+  personaggi:  {l:"Chi c'era?",                 s:"Persone, figure, presenze — salta se nessuno",          o:true},
+  sensazioni:  {l:"Cosa hai sentito nel corpo?", s:"Il corpo ricorda prima della mente",                    o:true},
+  emozioni:    {l:"Quali emozioni?",             s:"Arrivano dopo le sensazioni — completa in seduta",      o:true},
+  simboli:     {l:"Simboli importanti",          s:"Elementi carichi di significato",                       o:true},
+  associazioni:{l:"Connessioni col pregresso",   s:"Questo tema è già comparso? Cosa elabora l'inconscio?", o:true},
+  domande:     {l:"Domande per la seduta",       s:"Seleziona o scrivi liberamente",                        o:true},
+  titolo:      {l:"Dai un titolo al sogno",      s:"Ora che hai il quadro completo",                        o:false},
+};
+const C = {
+  teal: {bg:"#E1F5EE",bd:"#0F6E56",tx:"#04342C"},
+  coral:{bg:"#FAECE7",bd:"#993C1D",tx:"#4A1B0C"},
+  amber:{bg:"#FAEEDA",bd:"#854F0B",tx:"#412402"},
+  acc:  {bg:"#EEEDFE",bd:"#534AB7",tx:"#26215C"},
+  green:{bg:"#EAF3DE",bd:"#3B6D11",tx:"#173404"},
+};
+
+let st = {
+  step:0, view:"form", status:null,
+  data:"",luogo:"",trama:"",personaggi:"",associazioni:"",altreNota:"",titolo:"",
+  sens:[],emoz:[],simb:[],dqs:[],
+  simbExtra:[], accOpen:{},
+};
+
+const r = () => document.getElementById("root").innerHTML = st.view==="preview" ? preview() : form();
+const set = p => { Object.assign(st,p); r(); };
+
+function logo() {
+  return `<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <circle cx="16" cy="16" r="15" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <path d="M20 10.5C17.5 10.5 15 12.7 15 16C15 19.3 17.5 21.5 20 21.5C18.8 22.4 17.5 23 16 23C12.1 23 9 19.9 9 16C9 12.1 12.1 9 16 9C17.5 9 18.8 9.6 20 10.5Z" fill="#534AB7"/>
+    <circle cx="23" cy="11" r="1" fill="#7F77DD"/>
+    <circle cx="25" cy="15" r="0.7" fill="#AFA9EC"/>
+    <circle cx="22" cy="18" r="0.6" fill="#7F77DD"/>
+  </svg>`;
+}
+
+function hint(txt, col) {
+  return `<div class="hint" style="border-left:2px solid ${col||'#7F77DD'}">${txt}</div>`;
+}
+
+function chipSet(items, sel, ck, fn) {
+  const c = C[ck]||C.acc;
+  return `<div class="chips">${items.map(it => {
+    const on = sel.includes(it);
+    return `<button class="chip${on?' on':''}" style="${on?`background:${c.bg};color:${c.tx};border-color:${c.bd}`:''}" onclick="${fn}('${it.replace(/'/g,"\\'")}')">${it}</button>`;
+  }).join('')}</div>`;
+}
+
+function accordion(groups, sel, fn) {
+  return `<div class="acc">${Object.entries(groups).map(([g,{c,i}]) => {
+    const col = C[c]||C.acc;
+    const open = st.accOpen[g];
+    const n = i.filter(x=>sel.includes(x)).length;
+    return `<button class="acc-h" style="${open?`background:${col.bg};color:${col.tx}`:''}" onclick="toggleAcc('${g.replace(/'/g,"\\'")}')">
+      <span>${g}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        ${n?`<span class="badge" style="background:${col.bd}">${n}</span>`:''}
+        <span style="color:${open?col.bd:'#94a3b8'}">${open?'▲':'▼'}</span>
+      </span>
+    </button>
+    ${open?`<div class="acc-b">${chipSet(i,sel,c,fn)}</div>`:''}`;
+  }).join('')}</div>`;
+}
+
+function form() {
+  const id = STEPS[st.step];
+  const m = META[id];
+  const last = st.step === STEPS.length-1;
+  const ok = m.o || (id==='data'?!!st.data : id==='trama'?!!st.trama.trim() : id==='titolo'?!!st.titolo.trim() : true);
+
+  let body = '';
+
+  if(id==='data') body=`<div class="dw"><input type="date" value="${st.data}" onchange="sf('data',this.value)"/><span class="di">📅</span></div>`;
+
+  if(id==='luogo') body=`<textarea rows="5" placeholder="Una stanza enorme, soffitti altissimi.&#10;Luce fredda, quasi ospedaliera.&#10;Silenzio pesante, pavimento lucido." oninput="sf('luogo',this.value)">${st.luogo}</textarea>`;
+
+  if(id==='trama') body=`<textarea rows="5" placeholder="Cosa è successo…" oninput="sf('trama',this.value)">${st.trama}</textarea>`;
+
+  if(id==='personaggi') {
+    const ctx = st.luogo.trim().length>8 ? st.luogo.split('\n').filter(l=>l.trim().length>0)[0] : '';
+    body=`${ctx?`<div class="ctx">${ctx}</div>`:''}
+    <textarea rows="5" placeholder="Zia Anna&#10;Un collega sconosciuto&#10;Una figura minacciosa in fondo alla stanza" oninput="sf('personaggi',this.value)">${st.personaggi}</textarea>`;
+  }
+
+  if(id==='sensazioni') body=`${hint('Cosa hai sentito nel corpo al risveglio o durante il sogno?','#1D9E75')}${accordion(S,st.sens,'togS')}`;
+
+  if(id==='emozioni') body=`${hint('Le emozioni emergono dai segnali fisici. Scegli quelle chiare ora, aggiungi le altre dopo la seduta.','#7F77DD')}${accordion(E,st.emoz,'togE')}`;
+
+  if(id==='simboli') body=`
+    ${chipSet([...SIMB,...st.simbExtra],st.simb,'acc','togSim')}
+    <div class="ar">
+      <input type="text" id="ns" placeholder="Aggiungi simbolo…" onkeydown="if(event.key==='Enter')addSim()"/>
+      <button class="btn-s" style="padding:11px 16px;font-size:14px" onclick="addSim()">+ Aggiungi</button>
+    </div>`;
+
+  if(id==='associazioni') body=`${hint('Questo tema è già comparso in altri sogni? Cosa ti ricorda della tua vita in questo periodo?','#7F77DD')}
+    <textarea rows="5" placeholder="Es. Il corridoio mi ricorda il sogno di marzo…" oninput="sf('associazioni',this.value)">${st.associazioni}</textarea>`;
+
+  if(id==='domande') body=`
+    ${hint('Seleziona le domande che risuonano — ti aiuteranno in seduta.','#534AB7')}
+    ${DQ.map(q=>`<button class="dq${st.dqs.includes(q)?' on':''}" onclick="togDq('${q.replace(/'/g,"\\'")}')">${st.dqs.includes(q)?'✓ ':''}${q}</button>`).join('')}
+    <div class="sep"></div>
+    <div style="font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">Altra domanda</div>
+    <textarea rows="3" placeholder="Scrivi una domanda libera…" oninput="sf('altreNota',this.value)">${st.altreNota}</textarea>`;
+
+  if(id==='titolo') body=`<input type="text" value="${st.titolo}" placeholder="Es. Corridoio / sauna / castello" oninput="sf('titolo',this.value)" autofocus/>`;
+
+  return `
+    <div class="prog">${STEPS.map((_,i)=>`<div class="ps" style="background:${i<st.step?'#7F77DD':i===st.step?'#534AB7':'#e2e8f0'}"></div>`).join('')}</div>
+    <div class="sh">
+      ${logo()}
+      <div>
+        <div class="sc">${st.step+1} / ${STEPS.length}${m.o?' · opzionale':''}</div>
+        <div class="sl">${m.l}</div>
+        <div class="ss">${m.s}</div>
+      </div>
+    </div>
+    ${body}
+    <div class="cta" style="justify-content:${st.step>0?'space-between':'flex-end'}">
+      ${st.step>0?`<button class="btn-s" onclick="prev()">← Indietro</button>`:''}
+      <button class="btn-p" ${!ok&&!m.o?'disabled':''} onclick="next()">${last?'Vedi scheda →':'Avanti →'}</button>
+    </div>
+    ${m.o?`<div style="text-align:center;margin-top:12px"><button class="btn-g" onclick="next()">Salta questo passo</button></div>`:''}`;
+}
+
+function preview() {
+  const df = st.data ? new Date(st.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : '';
+  const ps = st.personaggi.split('\n').filter(Boolean);
+  const dqs = [...st.dqs,...(st.altreNota.trim()?[st.altreNota.trim()]:[])];
+
+  const sec = (l,h) => h?`<div class="pv-sec"><div class="pv-label">${l}</div>${h}</div>`:'';
+  const tags = (items,ck) => { const c=C[ck]||C.acc; return `<div style="display:flex;flex-wrap:wrap;gap:4px">${items.map(t=>`<span class="tag" style="background:${c.bg};color:${c.tx};border:1px solid ${c.bd}">${t}</span>`).join('')}</div>`; };
+
+  const s = st.status;
+  return `
+    <div class="card-h">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">${logo()}<span style="font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#7F77DD">Scheda sogno</span></div>
+      <div style="font-size:19px;font-weight:600;color:#26215C;line-height:1.3">${st.titolo||'—'}</div>
+      <div style="font-size:13px;color:#534AB7;margin-top:4px">${df}</div>
+    </div>
+    ${sec('Dove eri?', st.luogo?`<p style="font-size:14px;color:#64748b;font-style:italic;line-height:1.7">${st.luogo}</p>`:'')}
+    ${sec('Trama', st.trama?`<p style="font-size:14px;color:#334155;line-height:1.7">${st.trama}</p>`:'')}
+    ${sec('Personaggi', ps.length?ps.map(p=>`<div style="font-size:14px;color:#334155;padding:2px 0">— ${p}</div>`).join(''):'')}
+    ${sec('Sensazioni fisiche', st.sens.length?tags(st.sens,'teal'):'')}
+    ${sec('Emozioni', st.emoz.length?tags(st.emoz,'coral'):'')}
+    ${sec('Simboli', st.simb.length?tags(st.simb,'acc'):'')}
+    ${sec('Connessioni col pregresso', st.associazioni?`<p style="font-size:14px;color:#64748b;font-style:italic;line-height:1.7">${st.associazioni}</p>`:'')}
+    ${sec('Domande per la seduta', dqs.length?dqs.map(d=>`<div style="font-size:14px;color:#334155;background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:6px">↗ ${d}</div>`).join(''):'')}
+    <div class="sep"></div>
+    <div class="cta" style="justify-content:space-between">
+      <button class="btn-s" onclick="set({view:'form',status:null})">← Modifica</button>
+      <button class="btn-p" ${s==='saving'||s==='done'?'disabled':''} onclick="save()">
+        ${s==='saving'?'Salvataggio…':s==='done'?'✓ Salvato':'Salva su Notion'}
+      </button>
+    </div>
+    ${s==='done'?`<div class="ok-box">✓ Sogno salvato nel diario<br><button class="btn-g" style="color:#0F6E56;margin-top:12px" onclick="reset()">Aggiungi un altro sogno</button></div>`:''}
+    ${s==='error'?`<div class="err-box">${st.errMsg||'Errore durante il salvataggio.'}<br><button class="btn-s" style="margin-top:12px;font-size:14px" onclick="save()">Riprova</button></div>`:''}`;
+}
+
+function sf(k,v){st[k]=v;}
+function prev(){if(st.step>0)set({step:st.step-1});}
+function next(){
+  const id=STEPS[st.step], m=META[id], last=st.step===STEPS.length-1;
+  if(last){set({view:'preview'});return;}
+  const ok=m.o||(id==='data'?!!st.data:id==='trama'?!!st.trama.trim():id==='titolo'?!!st.titolo.trim():true);
+  if(ok||m.o) set({step:st.step+1});
+}
+function toggleAcc(g){st.accOpen[g]=!st.accOpen[g];r();}
+function tog(k,v){const a=st[k];st[k]=a.includes(v)?a.filter(x=>x!==v):[...a,v];r();}
+function togS(v){tog('sens',v);}
+function togE(v){tog('emoz',v);}
+function togSim(v){tog('simb',v);}
+function togDq(v){tog('dqs',v);}
+function addSim(){
+  const el=document.getElementById('ns');
+  if(!el)return;
+  const t=el.value.trim();
+  if(t&&!st.simbExtra.includes(t)&&!SIMB.includes(t)){st.simbExtra.push(t);st.simb.push(t);}
+  r();
+}
+function reset(){
+  st={step:0,view:'form',status:null,data:'',luogo:'',trama:'',personaggi:'',associazioni:'',altreNota:'',titolo:'',sens:[],emoz:[],simb:[],dqs:[],simbExtra:[],accOpen:{}};
+  r();
+}
+
+async function save(){
+  set({status:'saving'});
+  try{
+    const ps=st.personaggi.split('\n').filter(Boolean);
+    const dqs=[...st.dqs,...(st.altreNota.trim()?[st.altreNota.trim()]:[])];
+    const ch=[];
+    const h2=(t)=>ch.push({object:'block',type:'heading_2',heading_2:{rich_text:[{type:'text',text:{content:t}}]}});
+    const p=(t)=>ch.push({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:t}}]}});
+
+    if(st.luogo){h2('Dove eri?');p(st.luogo);}
+    if(st.trama){h2('Trama');p(st.trama);}
+    if(ps.length){h2('Personaggi');ps.forEach(x=>p('— '+x));}
+    if(st.sens.length){h2('Sensazioni fisiche');p(st.sens.join(', '));}
+    if(st.emoz.length){h2('Emozioni');p(st.emoz.join(', '));}
+    if(st.simb.length){h2('Simboli');p(st.simb.join(', '));}
+    if(st.associazioni){h2('Connessioni col pregresso');p(st.associazioni);}
+    if(dqs.length){h2('Domande per la seduta');dqs.forEach((d,i)=>p((i+1)+'. '+d));}
+
+    const body={
+      parent:{database_id:DB},
+      properties:{
+        Titolo:{title:[{text:{content:st.titolo||'Sogno senza titolo'}}]},
+        Data:{date:{start:st.data||new Date().toISOString().split('T')[0]}},
+        Simboli:{multi_select:st.simb.map(n=>({name:n}))},
+      },
+      children:ch,
+    };
+
+    const res=await fetch('https://api.notion.com/v1/pages',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+TOKEN,
+        'Content-Type':'application/json',
+        'Notion-Version':'2022-06-28',
+      },
+      body:JSON.stringify(body),
+    });
+
+    const data=await res.json();
+    if(res.ok) set({status:'done'});
+    else set({status:'error',errMsg:data.message||'Errore durante il salvataggio.'});
+  }catch(e){
+    set({status:'error',errMsg:'Errore di rete. Controlla la connessione.'});
+  }
+}
+
+r();
+</script>
+</body>
+</html>
