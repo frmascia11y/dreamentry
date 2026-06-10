@@ -91,14 +91,14 @@ const STEPS = ["data","luogo","trama","personaggi","sensazioni","emozioni","simb
 const META = {
   data:        {l:"Quando?",                    s:"Data del sogno",                                         o:false},
   luogo:       {l:"Dove eri?",                  s:"Il posto, l'atmosfera, la luce",                         o:true},
-  trama:       {l:"Cosa è successo?",            s:"Dal luogo, ricostruisci la scena",                       o:false},
+  trama:       {l:"Cosa è successo?",            s:"Dal luogo, ricostruisci la scena",                       o:true},
   personaggi:  {l:"Chi c'era?",                 s:"Persone, figure, presenze — salta se nessuno",           o:true},
   sensazioni:  {l:"Cosa hai sentito nel corpo?", s:"Il corpo ricorda prima della mente",                     o:true},
   emozioni:    {l:"Quali emozioni?",             s:"Arrivano dopo le sensazioni — completa in seduta",       o:true},
   simboli:     {l:"Simboli importanti",          s:"Elementi carichi di significato",                        o:true},
   associazioni:{l:"Connessioni col pregresso",   s:"Questo tema è già comparso? Cosa elabora l'inconscio?", o:true},
   domande:     {l:"Domande per la seduta",       s:"Seleziona o scrivi liberamente",                         o:true},
-  titolo:      {l:"Dai un titolo al sogno",      s:"Ora che hai il quadro completo",                         o:false},
+  titolo:      {l:"Dai un titolo al sogno",      s:"Ora che hai il quadro completo",                         o:true},
 };
 const COL = {
   teal: {bg:"#E1F5EE",bd:"#0F6E56",tx:"#04342C"},
@@ -169,7 +169,7 @@ function form(){
   const id=STEPS[st.step];
   const m=META[id];
   const last=st.step===STEPS.length-1;
-  const ok=m.o||(id==='data'?!!st.data:id==='trama'?!!st.trama.trim():id==='titolo'?!!st.titolo.trim():true);
+  const ok = true; // tutti gli step sono navigabili liberamente
 
   let body='';
 
@@ -249,7 +249,7 @@ function form(){
     ${body}
     <div class="cta" style="justify-content:${st.step>0?'space-between':'flex-end'}">
       ${st.step>0?`<button class="btn-s" onclick="prev()">← Indietro</button>`:''}
-      <button class="btn-p" ${!ok&&!m.o?'disabled':''} onclick="next()">${last?'Vedi scheda →':'Avanti →'}</button>
+      <button class="btn-p" onclick="next()">${last?'Vedi scheda →':'Avanti →'}</button>
     </div>
     ${m.o?`<div style="text-align:center;margin-top:12px"><button class="btn-g" onclick="next()">Salta questo passo</button></div>`:''}`;
 }
@@ -342,10 +342,9 @@ function updateNext(){
 }
 function prev(){if(st.step>0)patch({step:st.step-1});}
 function next(){
-  const id=STEPS[st.step],m=META[id],last=st.step===STEPS.length-1;
+  const last=st.step===STEPS.length-1;
   if(last){patch({view:'preview'});return;}
-  const ok=m.o||(id==='data'?!!st.data:id==='trama'?!!st.trama.trim():id==='titolo'?!!st.titolo.trim():true);
-  if(ok||m.o) patch({step:st.step+1});
+  patch({step:st.step+1});
 }
 function toggleAcc(g){st.accOpen[g]=!st.accOpen[g];r();}
 function togByBtn(k,btn){
