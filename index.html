@@ -162,7 +162,14 @@ function form() {
 
   let body = '';
 
-  if(id==='data') body=`<div class="dw"><input type="date" value="${st.data}" onchange="sf('data',this.value)"/><span class="di">📅</span></div>`;
+  if(id==='data') body=`
+    <div class="dw">
+      <input type="date" value="${st.data}" onchange="onDateChange(this.value)" oninput="onDateChange(this.value)" style="padding-right:40px"/>
+      <span class="di">📅</span>
+    </div>
+    <div style="margin-top:12px;text-align:center">
+      <button class="btn-g" onclick="onDateChange(new Date().toISOString().split('T')[0]);next()">Usa oggi (${new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long'})})</button>
+    </div>`;
 
   if(id==='luogo') body=`<textarea rows="5" placeholder="Una stanza enorme, soffitti altissimi.&#10;Luce fredda, quasi ospedaliera.&#10;Silenzio pesante, pavimento lucido." oninput="sf('luogo',this.value)">${st.luogo}</textarea>`;
 
@@ -257,6 +264,7 @@ function next(){
   const ok=m.o||(id==='data'?!!st.data:id==='trama'?!!st.trama.trim():id==='titolo'?!!st.titolo.trim():true);
   if(ok||m.o) set({step:st.step+1});
 }
+function onDateChange(v){st.data=v;r();}
 function toggleAcc(g){st.accOpen[g]=!st.accOpen[g];r();}
 function tog(k,v){const a=st[k];st[k]=a.includes(v)?a.filter(x=>x!==v):[...a,v];r();}
 function togS(v){tog('sens',v);}
